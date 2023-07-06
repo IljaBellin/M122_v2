@@ -1,9 +1,27 @@
 import pandas as pd
 import re
 import random
+import os
+import shutil
 from datetime import datetime
+import zipfile
 
-# Funktion zum Entfernen von Sonderzeichen und Ersetzen von Umlauten und Akzenten
+
+# alte datei verscheiben
+
+src_dir = r"C:\Daten\TBZ\Module\M122\email_projekt"
+dst_dir = r"C:\Daten\TBZ\Module\M122\email_projekt\mailimport_archive"
+
+for filename in os.listdir(src_dir):
+    if "mailimports" in filename:
+        src_file = os.path.join(src_dir, filename)
+        dst_file = os.path.join(dst_dir, filename)
+        shutil.move(src_file, dst_file)
+        print('alte Datein verschoben')
+
+# Daten Normalisieren 
+
+
 #def normalize_string(s):
   #  s = s.replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue').replace('é', 'e').replace('è', 'e').replace('ë', 'e').replace('à', 'a').replace('á', 'a').replace('ç', 'c').replace('ì', 'i')
  #   return s.lower()
@@ -58,19 +76,20 @@ def normalize_string(s):
         'Î': 'I',
         'Ý': 'Y',
         'Ù': 'U',
-        'Ä': 'A',
-        'Ö': 'O',
-        'Ü': 'U',
+        'Ä': 'Ae',
+        'Ö': 'Oe',
+        'Ü': 'Ue',
         'Ÿ': 'Y'
     }
     for char, replacement in replacements.items():
         s = s.replace(char, replacement)
+    
+    #lowercase
     return s.lower()
 
 
-# Funktion zum Generieren eines zufälligen Passworts
+# Passwort generator
 def generate_password():
-    # Hier können Sie die Anforderungen an das Passwort anpassen
     allowed_characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     password_length = 8
     password = ''.join(random.choice(allowed_characters) for _ in range(password_length))
@@ -105,4 +124,25 @@ output_df = pd.DataFrame(output_data)
 # Speichern der Ausgabedatei
 output_df.to_csv(output_filename, sep=';', index=False)
 
-print('Die Datei', output_filename, 'wurde erfolgreich erstellt.')
+print('datei wurde erstellt')
+
+
+
+
+# Archiv Datei
+
+
+def zip_folder(folder_path, output_path):
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, folder_path))
+
+folder_to_zip = 'C:/Daten/TBZ/Module/M122/email_projekt/ausgaben'
+output_zip_file = 'C:/Daten/TBZ/Module/M122/email_projekt/ausgaben'
+zip_folder(folder_to_zip, output_zip_file)
+
+
+
+
