@@ -210,8 +210,8 @@ class_name = 'PE22d'
 last_name = 'Bellin'
 zip_folder(folder_to_zip, output_folder, class_name, last_name)
 
+#email senden'
 
-#Email senden
 def send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body, attachment_path):
     # Create the multipart message
     message = MIMEMultipart()
@@ -231,23 +231,26 @@ def send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_
     message.attach(part)
 
     # Connect to the SMTP server and send the email
-    with SMTP_SSL(smtp_server, smtp_port) as server:
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
         server.login(sender_email, sender_password)
         server.send_message(message)
 
 
-smtp_server = 'mail.gmx.net'
-smtp_port = 465
-sender_email = 'rc.hero@gmx.ch'
-sender_password = '4evwv3#@LTXQdC3y'
-recipient_email = 'ilja.bellin@gmx.ch'
-subject = 'Neue TBZ-Mailadressen '
-body = '''Hey
+    smtp_server = 'mail.gmx.net'
+    smtp_port = 587
+    sender_email = 'rc.hero@gmx.ch'
+    sender_password = '4evwv3#@LTXQdC3y'
+    recipient_email = 'ilja.bellin@gmx.ch'
+    subject = 'Neue TBZ-Mailadressen '
+    body = '''Hey
 
-Die Emailadressen-Generierung ist beendet.
+    Die Emailadressen-Generierung ist beendet.
 
-Lg Ilja
-'''
-attachment_path = 'C:/Daten/TBZ/Module/M122/email_projekt/2023-07-06_13-54-49_newMails_PE22d_Bellin.zip'
+    Lg Ilja
+    '''
+    attachment_path = 'C:/Daten/TBZ/Module/M122/email_projekt/2023-07-06_13-54-49_newMails_PE22d_Bellin.zip'
 
-send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body, attachment_path)
+    send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body, attachment_path)
