@@ -210,47 +210,31 @@ class_name = 'PE22d'
 last_name = 'Bellin'
 zip_folder(folder_to_zip, output_folder, class_name, last_name)
 
-#email senden'
+#email
 
-def send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body, attachment_path):
-    # Create the multipart message
+def send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body):
     message = MIMEMultipart()
     message['Subject'] = subject
     message['From'] = sender_email
     message['To'] = recipient_email
 
-    # Add the body to the message
     message.attach(MIMEText(body, 'plain'))
 
-    # Add the attachment
-    attachment = open(attachment_path, 'rb')
-    part = MIMEBase('application', 'zip')
-    part.set_payload(attachment.read())
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f'attachment; filename="{attachment_path}"')
-    message.attach(part)
-
-    # Connect to the SMTP server and send the email
     with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
+        server.starttls()  # Enable TLS
         server.login(sender_email, sender_password)
         server.send_message(message)
 
+# server
+smtp_server = 'mail.gmx.net'
+smtp_port = 587 
 
-    smtp_server = 'mail.gmx.net'
-    smtp_port = 587
-    sender_email = 'rc.hero@gmx.ch'
-    sender_password = '4evwv3#@LTXQdC3y'
-    recipient_email = 'ilja.bellin@gmx.ch'
-    subject = 'Neue TBZ-Mailadressen '
-    body = '''Hey
+# an wen
+sender_email = 'rc.hero@gmx.ch'
+sender_password = '4evwv3#@LTXQdC3y'
+recipient_email = 'ilja.bellin@gmx.ch'
+subject = 'Test Email'
+body = 'test.'
 
-    Die Emailadressen-Generierung ist beendet.
-
-    Lg Ilja
-    '''
-    attachment_path = 'C:/Daten/TBZ/Module/M122/email_projekt/2023-07-06_13-54-49_newMails_PE22d_Bellin.zip'
-
-    send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body, attachment_path)
+# schicken
+send_email(smtp_server, smtp_port, sender_email, sender_password, recipient_email, subject, body)
