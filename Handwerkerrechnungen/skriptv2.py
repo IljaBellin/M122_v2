@@ -1,6 +1,7 @@
 import csv
 import os
 import xml.etree.ElementTree as ET
+import datetime
 
 def generate_invoice_txt(csv_file):
     with open(csv_file, 'r') as file:
@@ -73,13 +74,25 @@ def generate_invoice_xml(csv_file):
     with open(csv_file, 'r') as file:
         reader = csv.reader(file, delimiter=';')
         rows = list(reader)
-        rechnung_nr, auftrag_nr, _, datum, _, _ = rows[0]
+        rechnung_nr, auftrag_nr, _, datum, _, zahlungsziel = rows[0]
         _, _, kundennummer, _, _, _, ust_id, _ = rows[1]
 
     message_reference = ET.SubElement(header, 'MESSAGE-REFERENCE')
     reference_date = ET.SubElement(message_reference, 'REFERENCE-DATE')
     ET.SubElement(reference_date, 'Reference-No').text = rechnung_nr
-    ET.SubElement(reference_date, 'Date').text = datum
+    ET.SubElement(reference_date, 'Date').text = datetime.datetime.strptime(datum, '%d.%m.%Y').strftime('%Y%m%d')
+
+    # ... continue building the XML structure
+
+    summary = ET.SubElement(invoice, 'SUMMARY')  # Add this line
+
+    payment_terms = ET.SubElement(summary, 'PAYMENT-TERMS')
+    basic = ET.SubElement(payment_terms, 'BASIC', {'Payment-Type': "ESR", 'Terms-Type': "1"})
+    terms = ET.SubElement(basic, 'TERMS')
+    payment_period = ET.SubElement(terms, 'Payment-Period', {'Type': "M", 'On-Or-After': "1", 'Reference-Day': "31"})
+    payment_period.text = zahlungsziel
+    payment_date = datetime.datetime.strptime(datum, '%d.%m.%Y') + datetime.timedelta(days=int(zahlungsziel))
+    ET.SubElement(terms, 'Date').text = payment_date.strftime('%Y%m%d')
 
     # ... continue building the XML structure
 
@@ -89,13 +102,24 @@ def generate_invoice_xml(csv_file):
     return xml_string
 
 
+
 # Hauptprogramm
+
+# Verzeichnis, in dem sich das Skript befindet
+skript_verzeichnis = os.path.dirname(os.path.abspath(__file__))
 
 # Verzeichnis, in dem sich die CSV-Dateien befinden
 csv_verzeichnis = os.path.join(skript_verzeichnis, 'data')
 
+# Verzeichnis für die Ausgabe der TXT- und XML-Dateien
+ausgabe_verzeichnis = os.path.join(skript_verzeichnis, 'ausgaben')
+
 # Liste aller CSV-Dateien im Verzeichnis
 csv_dateien = [f for f in os.listdir(csv_verzeichnis) if f.endswith('.data')]
+
+# Erstellen des Ausgabeordners, falls er nicht vorhanden ist
+if not os.path.exists(ausgabe_verzeichnis):
+    os.makedirs(ausgabe_verzeichnis)
 
 # Für jede CSV-Datei das Textdokument und die XML-Datei generieren
 for csv_datei in csv_dateien:
